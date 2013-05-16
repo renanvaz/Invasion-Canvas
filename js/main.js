@@ -2,11 +2,12 @@
 	EteBitmap = function() {
 		this.initialize();
 	}
-	EteBitmap._SpriteSheet = new createjs.SpriteSheet({images: ['getImage.php?color=995599&type=ete'], frames: [[0,0,153,158,0,74.5,74],[153,0,153,158,0,74.5,74],[306,0,153,158,0,74.5,74],[0,158,153,158,0,74.5,74],[153,158,153,158,0,74.5,74],[306,158,153,158,0,74.5,74],[0,316,153,158,0,74.5,74],[153,316,153,158,0,74.5,74]],  animations: {fall:[0,7, true]}});
 	var EteBitmap_p = EteBitmap.prototype = new createjs.BitmapAnimation();
 	EteBitmap_p.BitmapAnimation_initialize = EteBitmap_p.initialize;
 	EteBitmap_p.initialize = function() {
-		this.BitmapAnimation_initialize(EteBitmap._SpriteSheet);
+		this.imageIndex = Math.round(Math.random() * (Ete.images.length - 1));
+		this._SpriteSheet = new createjs.SpriteSheet({images: Ete.images[this.imageIndex].ete, frames: [[0,0,153,158,0,74.5,74],[153,0,153,158,0,74.5,74],[306,0,153,158,0,74.5,74],[0,158,153,158,0,74.5,74],[153,158,153,158,0,74.5,74],[306,158,153,158,0,74.5,74],[0,316,153,158,0,74.5,74],[153,316,153,158,0,74.5,74]],  animations: {fall:[0,7, true]}});
+		this.BitmapAnimation_initialize(this._SpriteSheet);
 		this.paused = false;
 	}
 	EteBitmap_p.fall = function(){
@@ -34,11 +35,11 @@ Game = {
 		this.stage.addChild(sprite);
 	}
 
-
-
 	, initializer: function(){
 		var self = this
 			, manifest;
+
+		Ete.generateRandomImages(10);
 
 		this.canvas = document.getElementById('game');
 		this.stage = new createjs.Stage(this.canvas);
@@ -46,13 +47,15 @@ Game = {
 		//this.stage.autoClear = false;
 
 		var manifest = [
-            {src:'getImage.php?color=995599&type=ete', id:'ete'}
-            , {src:'img/EteExplode.png', id:'explode'}
-            , {src:'img/mountain1.png', id:'mountain1'}
-            , {src:'img/mountain2.png', id:'mountain2'}
+            {src:'img/mountain1.png'}
+            , {src:'img/mountain2.png'}
         ];
 
-        loader = new createjs.LoadQueue(false);
+        for (var i = 0; i < Ete.images.length; i++) {
+        	manifest.push({src: Ete.images[i].ete, id:'ete'+i});
+        	manifest.push({src: Ete.images[i].explode, id:'explode'+i});
+        };
+
         loader.onComplete = function(){
         	var mountain1 = loader.getResult('mountain1');
         	var mountain2 = loader.getResult('mountain2');
@@ -73,7 +76,8 @@ Game = {
 			Ete.interval();
         }
 
-        loader.loadManifest(manifest);
+        var preloader = new Preloader;
+        preloader.loadManifest(manifest);
 	}
 
 	, tick: function(e){
@@ -105,7 +109,8 @@ Game = {
 }
 
 var Ete = {
-	create: function(){
+	images: []
+	, create: function(){
 		var rand1 		= Math.random()
 			, rand2 	= Math.random()
 			, rand3 	= Math.random()
@@ -146,6 +151,20 @@ var Ete = {
 		var self = this;
 		this.create();
 		setTimeout(function(){ self.interval(); }, Math.random() * self.time + 1000);
+	}
+	, generateRandomImages: function(n){
+		var colors =['#c165c1']; //Initied with default color
+		for(var i = 0; i < n; i++){
+			colors.push('#' + (Math.round(Math.random() * (255 * 255 * 255))).toString(16));
+		}
+
+		for(var i = 0; i < colors.length; i++){
+			this.images.push({
+				color: colors[i]
+				, ete: 'getImage.php?type=ete&color='+encodeURIComponent(colors[i])
+				, explode: 'getImage.php?type=explode&color='+encodeURIComponent(colors[i])
+			});
+		}
 	}
 }
 
@@ -200,50 +219,76 @@ var Arr = {
     }
 }
 
-
-var EteImage = (function(){
-	function EteImage(){
-		var self = this;
-		this.data = {index: [], cache: {}};
+var Preloader = (function(){
+	function Preloader(){
+		this.queue = [];
+		this.index = 0;
 	}
-	EteImage.prototype = new DisplayObject();
 
-	EteImage.prototype.cache = function(colors){
-		var self = this;
-		var count = 0;
-		for(var i = 0; i < colors.length; i++){
-			var img = {
-				ete: new Image,
-				explode: new Image
-			}
+	Preloader.prototype.bind = function(name, fn){
+		if(!this.event)	this.event = new EventHandler(this);
+		this.event.bind(name, fn);
+	};
 
-			var nocache = +new Date;
+	Preloader.prototype.trigger = function(name, params){
+		if(!this.event)	this.event = new EventHandler(this);
+		this.event.trigger(name, params);
+	};
 
-			img.ete.onload = function(){
-				if(++count == colors.length*2){
-					self.trigger('cached');
-				}
-			}
-
-			img.explode.onload = function(){
-				if(++count == colors.length*2){
-					self.trigger('cached');
-				}
-			}
-
-			img.ete.src = 'getImage.php?type=ete&color='+encodeURIComponent(colors[i])+'&'+nocache;
-			img.explode.src = 'getImage.php?type=explode&color='+encodeURIComponent(colors[i])+'&'+nocache;
-
-			self.data.index.push(colors[i]);
-			self.data.cache[colors[i]] = img;
+	/*
+	* Add to a queue
+	* @param filename
+	*/
+	Preloader.prototype.add = function(filename){
+		if(this.queue.indexOf(filename) == -1 && this.list.indexOf(filename) == -1){
+			this.queue.push(filename);
+			this.trigger('add');
 		}
 	}
 
-	EteImage.prototype.getRandomCached = function(){
-		return this.data.cache[this.data.index[Math.round(Math.random() * (this.data.index.length -1))]];
+	/*
+	* Clear the queue
+	* @param
+	*/
+	Preloader.prototype.clear = function(){
+		this.queue = [];
+		this.index = 0;
+		this.trigger('clear');
 	}
 
-	return EteImage;
+	/*
+	* Load to the next file
+	* @param
+	*/
+	Preloader.prototype.next = function(){
+		if(this.queue.length < this.index){
+			var self 	= this;
+			var img 	= new Image();
+			var current = this.index++
+			img.src 	= this.queue[current];
+			img.onload 	= function(){
+				this.trigger('itemComplete', current);
+				Preloader.prototype.list.push(this);
+				self.next();
+			}
+		}else{
+			this.trigger('complete');
+		}
+	}
+
+	/*
+	* Start to load the queue
+	* @param
+	*/
+	Preloader.prototype.start = function(){
+		this.trigger('start');
+		this.next();
+	}
+
+	Preloader.prototype.list = [];
+
+	return Preloader;
 })();
+
 
 Game.initializer();
