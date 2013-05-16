@@ -1,0 +1,106 @@
+.arrow-up (@w, @h, @color) {
+	width: 0;
+	height: 0;
+	border-left: @w solid transparent;
+	border-right: @w solid transparent;
+	border-bottom: @h solid @color;
+}
+
+.arrow-down (@w, @h, @color) {
+	width: 0;
+	height: 0;
+	border-left: @w solid transparent;
+	border-right: @w solid transparent;
+	border-top: @h solid @color;
+}
+
+.arrow-right (@w, @h, @color) {
+	width: 0;
+	height: 0;
+	border-top: @h solid transparent;
+	border-bottom: @h solid transparent;
+	border-left: @w solid @color;
+}
+
+.arrow-left (@w, @h, @color) {
+	width: 0;
+	height: 0;
+	border-top: @h solid transparent;
+	border-bottom: @h solid transparent;
+	border-right: @w solid @color;
+}
+
+.snow-base (@w, @h) {
+	.arrow-up (@w, @h, rgb(239, 243, 245));
+
+	position: relative;
+	left: -@w;
+
+	@arrow-down-size: @w/3;
+	.snow-inner {
+		.arrow-down (@arrow-down-size, @arrow-down-size, rgb(239, 243, 245));
+
+		position: relative;
+		left: -@arrow-down-size;
+		top: @h;
+	}
+}
+
+body, html {
+	overflow: hidden;
+	margin: 0;
+	width: 100%;
+	height: 100%;
+}
+
+body {
+	background: #27BAAA;
+	position: relative;
+
+	#montain {
+		.arrow-up (300px, 500px, rgb(78, 65, 45));
+
+		position: absolute;
+		bottom: 0;
+		left: 30%;
+
+		.snow {
+			.snow-base (90px, 150px);
+		}
+	}
+
+	#montain2 {
+		.arrow-up (500px, 900px, #806640);
+
+		position: absolute;
+		bottom: 0;
+		left: 50%;
+
+		.snow {
+			.snow-base (139px, 250px);
+		}
+	}
+
+	.sprite-explode {
+		width: 233px;
+		height: 192px;
+	}
+
+	.sprite-ete {
+		width: 120px;
+		height: 125px;
+	}
+
+	[class^="icon-"] {
+		position: absolute;
+		font-size: 140px;
+		color: #FFF;
+		z-index: 1;
+		opacity: .8;
+	}
+
+	[class^="sprite-"] {
+		position: absolute;
+		z-index: 2;
+	}
+}
