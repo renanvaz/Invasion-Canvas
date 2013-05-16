@@ -5,16 +5,39 @@
 	var EteBitmap_p = EteBitmap.prototype = new createjs.BitmapAnimation();
 	EteBitmap_p.BitmapAnimation_initialize = EteBitmap_p.initialize;
 	EteBitmap_p.initialize = function() {
-		this.imageIndex = Math.round(Math.random() * (Ete.images.length - 1));
-		var img = Game.preloader.get('ete'+this.imageIndex);
-		this._SpriteSheet = new createjs.SpriteSheet({images: [img], frames: [[0,0,153,158,0,74.5,74],[153,0,153,158,0,74.5,74],[306,0,153,158,0,74.5,74],[0,158,153,158,0,74.5,74],[153,158,153,158,0,74.5,74],[306,158,153,158,0,74.5,74],[0,316,153,158,0,74.5,74],[153,316,153,158,0,74.5,74]],  animations: {fall:[0,7, true]}});
-		this.BitmapAnimation_initialize(this._SpriteSheet);
+		var i = Math.round(Math.random() * (Ete.images.length - 1));
+		var img = Game.preloader.get('ete'+i);
+		EteBitmap._SpriteSheet = new createjs.SpriteSheet({images: [img], frames: [[0,0,205,168,0,93.8,76.85],[205,0,205,168,0,93.8,76.85],[410,0,205,168,0,93.8,76.85],[615,0,205,168,0,93.8,76.85],[0,168,205,168,0,93.8,76.85],[205,168,205,168,0,93.8,76.85],[410,168,205,168,0,93.8,76.85],[615,168,205,168,0,93.8,76.85],[0,336,205,168,0,93.8,76.85],[205,336,205,168,0,93.8,76.85],[410,336,205,168,0,93.8,76.85],[615,336,205,168,0,93.8,76.85],[0,504,205,168,0,93.8,76.85],[205,504,205,168,0,93.8,76.85],[410,504,205,168,0,93.8,76.85],[615,504,205,168,0,93.8,76.85],[0,672,205,168,0,93.8,76.85],[205,672,205,168,0,93.8,76.85],[410,672,205,168,0,93.8,76.85],[615,672,205,168,0,93.8,76.85],[0,840,205,168,0,93.8,76.85],[205,840,205,168,0,93.8,76.85],[410,840,205,168,0,93.8,76.85],[615,840,205,168,0,93.8,76.85],[0,1008,205,168,0,93.8,76.85],[205,1008,205,168,0,93.8,76.85],[410,1008,205,168,0,93.8,76.85],[615,1008,205,168,0,93.8,76.85],[0,1176,205,168,0,93.8,76.85],[205,1176,205,168,0,93.8,76.85],[410,1176,205,168,0,93.8,76.85],[615,1176,205,168,0,93.8,76.85],[0,1344,205,168,0,93.8,76.85],[205,1344,205,168,0,93.8,76.85],[410,1344,205,168,0,93.8,76.85],[615,1344,205,168,0,93.8,76.85],[0,1512,205,168,0,93.8,76.85],[205,1512,205,168,0,93.8,76.85],[410,1512,205,168,0,93.8,76.85]],  animations: {bubble:[0,0, true], fall:[1,8, true], airplane:[9,27, true], explode:[28,38, true]}});
+		this.BitmapAnimation_initialize(EteBitmap._SpriteSheet);
 		this.paused = false;
+	}
+	EteBitmap_p.bubble = function(){
+		this.gotoAndPlay("bubble");
 	}
 	EteBitmap_p.fall = function(){
 		this.gotoAndPlay("fall");
 	}
+	EteBitmap_p.airplane = function(){
+		this.gotoAndPlay("airplane");
+	}
+	EteBitmap_p.explode = function(){
+		this.gotoAndPlay("explode");
+	}
 	window.EteBitmap = EteBitmap;
+}(window));
+
+(function(window) {
+	Bubble = function() {
+		this.initialize();
+	}
+	Bubble._SpriteSheet = new createjs.SpriteSheet({images: ["img/bubble.png"], frames: [[0,0,205,168,0,102.2,80.4],[205,0,205,168,0,102.2,80.4],[410,0,205,168,0,102.2,80.4],[615,0,205,168,0,102.2,80.4],[0,168,205,168,0,102.2,80.4],[205,168,205,168,0,102.2,80.4],[410,168,205,168,0,102.2,80.4],[615,168,205,168,0,102.2,80.4],[0,336,205,168,0,102.2,80.4],[205,336,205,168,0,102.2,80.4],[410,336,205,168,0,102.2,80.4],[615,336,205,168,0,102.2,80.4],[0,504,205,168,0,102.2,80.4],[205,504,205,168,0,102.2,80.4],[410,504,205,168,0,102.2,80.4],[615,504,205,168,0,102.2,80.4],[0,672,205,168,0,102.2,80.4],[205,672,205,168,0,102.2,80.4],[410,672,205,168,0,102.2,80.4],[615,672,205,168,0,102.2,80.4],[0,840,205,168,0,102.2,80.4],[205,840,205,168,0,102.2,80.4],[410,840,205,168,0,102.2,80.4],[615,840,205,168,0,102.2,80.4],[0,1008,205,168,0,102.2,80.4],[205,1008,205,168,0,102.2,80.4],[410,1008,205,168,0,102.2,80.4],[615,1008,205,168,0,102.2,80.4]]});
+	var Bubble_p = Bubble.prototype = new createjs.BitmapAnimation();
+	Bubble_p.BitmapAnimation_initialize = Bubble_p.initialize;
+	Bubble_p.initialize = function() {
+		this.BitmapAnimation_initialize(Bubble._SpriteSheet);
+		this.paused = false;
+	}
+	window.Bubble = Bubble;
 }(window));
 
 function V2 (x, y){
@@ -52,8 +75,7 @@ Game = {
         this.preloader.add({src:'img/mountain2.png', id:'mountain2'});
 
         for (var i = 0; i < Ete.images.length; i++) {
-        	this.preloader.add({src: Ete.images[i].ete, id:'ete'+i});
-        	this.preloader.add({src: Ete.images[i].explode, id:'explode'+i});
+        	this.preloader.add({src: Ete.images[i].src, id:'ete'+i});
         };
 
         this.preloader.bind('complete', function(){
@@ -104,7 +126,6 @@ Game = {
 		this.mountain2.y = window.innerHeight - this.mountain2.image.height;
 		this.mountain2.x = window.innerWidth * .4;
 	}
-
 }
 
 var Ete = {
@@ -122,8 +143,8 @@ var Ete = {
 			, ete 		= new createjs.Container
 			, ss 		= new EteBitmap;
 
-		ete.width = 153;
-		ete.height = 158;
+		ete.width = 205;
+		ete.height = 168;
 		ete.ss = ss;
 		ete.addChild(ss);
 
@@ -160,8 +181,7 @@ var Ete = {
 		for(var i = 0; i < colors.length; i++){
 			this.images.push({
 				color: colors[i]
-				, ete: 'getImage.php?type=ete&color='+encodeURIComponent(colors[i])
-				, explode: 'getImage.php?type=explode&color='+encodeURIComponent(colors[i])
+				, src: 'getImage.php?color='+encodeURIComponent(colors[i])
 			});
 		}
 	}

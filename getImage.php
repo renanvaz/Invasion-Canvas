@@ -15,7 +15,7 @@ class EteImage {
          $b = hexdec(substr($hex,4,2));
       }
       $rgb = array($r, $g, $b);
-      //return implode(",", $rgb); // returns the rgb values separated by commas
+
       return $rgb; // returns an array with the rgb values
    }
 
@@ -27,32 +27,11 @@ class EteImage {
       imagefilter($im, IMG_FILTER_COLORIZE, -$opposite[0], -$opposite[1], -$opposite[2]);
    }
 
-   public static function getExplode(){
+   public static function get($color){
       header('Content-Type: image/png');
 
-      $im = imagecreatefrompng('img/EteExplode.png');
-      $width = imagesx($im);
-      $height = imagesy($im);
-      $imn = imagecreatetruecolor($width, $height);
-      imagealphablending($imn,false);
-      $col=imagecolorallocatealpha($imn,255,255,255,127);
-      imagesavealpha($imn,true);
-      imagefilledrectangle($imn,0,0,$width,$height,$col);
-      imagealphablending($imn,true);
-      imagecopy($imn, $im, 0, 0, 0, 0, $width, $height);
-
-      // FOR A TRANSPARENT PNG FILE WITH SOMETHING INSIDE, YOU CAN CHANGE THE COLOR HERE: I HAVE RGB: 0, 255, 0
-      EteImage::multiplyColor($imn, EteImage::hex2rgb($_GET['color']));
-
-      imagepng($imn);
-      imagedestroy($imn);
-   }
-
-   public static function getEte(){
-      header('Content-Type: image/png');
-
-      $im = imagecreatefrompng('img/FallLayer1.png');
-      $layer = imagecreatefrompng('img/FallLayer2.png');
+      $im = imagecreatefrompng('img/EteLayer01.png');
+      $layer = imagecreatefrompng('img/EteLayer02.png');
 
       $width = imagesx($im);
       $height = imagesy($im);
@@ -74,7 +53,7 @@ class EteImage {
       imagecopy($layern, $layer, 0, 0, 0, 0, $width, $height);
 
       // FOR A TRANSPARENT PNG FILE WITH SOMETHING INSIDE, YOU CAN CHANGE THE COLOR HERE: I HAVE RGB: 0, 255, 0
-      EteImage::multiplyColor($imn, EteImage::hex2rgb($_GET['color']));
+      EteImage::multiplyColor($imn, EteImage::hex2rgb($color));
 
       imagecopy($imn, $layern, 0, 0, 0, 0, $width, $height);
       imagepng($imn);
@@ -89,8 +68,4 @@ header("Pragma: public");
 header("Cache-Control: max-age=".$cache_expire);
 header('Expires: ' . gmdate('D, d M Y H:i:s', time()+$cache_expire) . ' GMT');
 
-if($_GET['type'] == 'explode'){
-   EteImage::getExplode();
-}else{
-   EteImage::getEte();
-}
+EteImage::get($_GET['color']);
