@@ -6,7 +6,8 @@
 	EteBitmap_p.BitmapAnimation_initialize = EteBitmap_p.initialize;
 	EteBitmap_p.initialize = function() {
 		this.imageIndex = Math.round(Math.random() * (Ete.images.length - 1));
-		this._SpriteSheet = new createjs.SpriteSheet({images: Ete.images[this.imageIndex].ete, frames: [[0,0,153,158,0,74.5,74],[153,0,153,158,0,74.5,74],[306,0,153,158,0,74.5,74],[0,158,153,158,0,74.5,74],[153,158,153,158,0,74.5,74],[306,158,153,158,0,74.5,74],[0,316,153,158,0,74.5,74],[153,316,153,158,0,74.5,74]],  animations: {fall:[0,7, true]}});
+		var img = Game.preloader.get('ete'+this.imageIndex);
+		this._SpriteSheet = new createjs.SpriteSheet({images: [img], frames: [[0,0,153,158,0,74.5,74],[153,0,153,158,0,74.5,74],[306,0,153,158,0,74.5,74],[0,158,153,158,0,74.5,74],[153,158,153,158,0,74.5,74],[306,158,153,158,0,74.5,74],[0,316,153,158,0,74.5,74],[153,316,153,158,0,74.5,74]],  animations: {fall:[0,7, true]}});
 		this.BitmapAnimation_initialize(this._SpriteSheet);
 		this.paused = false;
 	}
@@ -46,19 +47,18 @@ Game = {
 		createjs.Touch.enable(this.stage);
 		//this.stage.autoClear = false;
 
-		var manifest = [
-            {src:'img/mountain1.png'}
-            , {src:'img/mountain2.png'}
-        ];
+		this.preloader = new Preloader;
+		this.preloader.add({src:'img/mountain1.png', id:'mountain1'});
+        this.preloader.add({src:'img/mountain2.png', id:'mountain2'});
 
         for (var i = 0; i < Ete.images.length; i++) {
-        	manifest.push({src: Ete.images[i].ete, id:'ete'+i});
-        	manifest.push({src: Ete.images[i].explode, id:'explode'+i});
+        	this.preloader.add({src: Ete.images[i].ete, id:'ete'+i});
+        	this.preloader.add({src: Ete.images[i].explode, id:'explode'+i});
         };
 
-        loader.onComplete = function(){
-        	var mountain1 = loader.getResult('mountain1');
-        	var mountain2 = loader.getResult('mountain2');
+        this.preloader.bind('complete', function(){
+        	var mountain1 = self.preloader.get('mountain1');
+        	var mountain2 = self.preloader.get('mountain2');
 
         	self.mountain1 = new createjs.Bitmap(mountain1);
 			self.mountain2 = new createjs.Bitmap(mountain2);
@@ -74,10 +74,9 @@ Game = {
 			self.onResize();
 
 			Ete.interval();
-        }
+        });
 
-        var preloader = new Preloader;
-        preloader.loadManifest(manifest);
+        this.preloader.start();
 	}
 
 	, tick: function(e){
@@ -219,6 +218,27 @@ var Arr = {
     }
 }
 
+
+var EventHandler = function(context){
+	this.context = context;
+	this.events = {};
+}
+
+EventHandler.prototype.bind = function(name, fn){
+	if(!this.events[name]){
+		this.events[name] = [fn];
+	}else{
+		this.events[name].push(fn);
+	}
+};
+
+EventHandler.prototype.trigger = function(name, params){
+	if(this.events[name])
+	for(var i = 0; i < this.events[name].length; i++){
+		this.events[name][i].apply(this.context, [params || null]);
+	}
+};
+
 var Preloader = (function(){
 	function Preloader(){
 		this.queue = [];
@@ -237,13 +257,44 @@ var Preloader = (function(){
 
 	/*
 	* Add to a queue
-	* @param filename
+	* @param params
 	*/
-	Preloader.prototype.add = function(filename){
-		if(this.queue.indexOf(filename) == -1 && this.list.indexOf(filename) == -1){
-			this.queue.push(filename);
+	Preloader.prototype.add = function(params){
+		if(!this.has(params)){
+			this.queue.push(params);
 			this.trigger('add');
 		}
+	}
+
+	Preloader.prototype.get = function(id){
+		console.log(this.list);
+		for (var i = 0; i < this.list.length; i++) {
+			if(this.list[i].id == id){
+				return this.list[i].img;
+			}
+		}
+
+		return false;
+	}
+
+	/*
+	* Add to a queue
+	* @param params
+	*/
+	Preloader.prototype.has = function(params){
+		for (var i = 0; i < this.queue.length; i++) {
+			if(JSON.stringify(this.queue[i]) == JSON.stringify(params)){
+				return true;
+			}
+		}
+
+		for (i = 0; i < this.list.length; i++) {
+			if(JSON.stringify(this.list[i]) == JSON.stringify(params)){
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	/*
@@ -261,14 +312,15 @@ var Preloader = (function(){
 	* @param
 	*/
 	Preloader.prototype.next = function(){
-		if(this.queue.length < this.index){
+		if(this.index < this.queue.length){
 			var self 	= this;
+			var current = this.index++;
 			var img 	= new Image();
-			var current = this.index++
-			img.src 	= this.queue[current];
+			img.src 	= this.queue[current].src;
 			img.onload 	= function(){
-				this.trigger('itemComplete', current);
-				Preloader.prototype.list.push(this);
+				self.trigger('itemComplete', current);
+				self.queue[current].img = this;
+				self.list.push(self.queue[current]);
 				self.next();
 			}
 		}else{
