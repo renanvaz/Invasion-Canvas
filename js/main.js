@@ -85,8 +85,8 @@ Game = {
         	self.mountain1 = new createjs.Bitmap(mountain1);
 			self.mountain2 = new createjs.Bitmap(mountain2);
 
-			//self.stage.addChild(self.mountain1);
-			//self.stage.addChild(self.mountain2);
+			self.stage.addChild(self.mountain1);
+			self.stage.addChild(self.mountain2);
 
 			createjs.Ticker.useRAF = true;
 			createjs.Ticker.addListener(self);
@@ -103,15 +103,16 @@ Game = {
 	}
 
 	, tick: function(e){
-		$('#fps').text(Math.round(createjs.Ticker.getMeasuredFPS()));
+		var h = window.innerHeight;
+		//$('#fps').text(Math.round(createjs.Ticker.getMeasuredFPS()));
 		for (var i = 0; i < this.sprites.length; i++) {
 			this.sprites[i].velocity.x += this.sprites[i].acceleration.x;
 			this.sprites[i].velocity.y += this.sprites[i].acceleration.y;
 
-			this.sprites[i].x += this.sprites[i].velocity.x;
-			this.sprites[i].y += this.sprites[i].velocity.y;
+			this.sprites[i].x += Math.round(this.sprites[i].velocity.x)|0;
+			this.sprites[i].y += Math.round(this.sprites[i].velocity.y)|0;
 
-			if(this.sprites[i].y > window.innerHeight + (this.sprites[i].height/2)){
+			if(this.sprites[i].y > h + (this.sprites[i].height/2)){
 				Game.remove(this.sprites[i]);
 			}
 		}
@@ -120,17 +121,19 @@ Game = {
 	}
 
 	, onResize: function(){
-		this.canvas.width 	= window.innerWidth;
-		this.canvas.height 	= window.innerHeight;
+		var w = window.innerWidth;
+		var h = window.innerHeight;
+		this.canvas.width 	= w;
+		this.canvas.height 	= h;
 
-		this.mountain1.y = window.innerHeight - this.mountain1.image.height;
-		this.mountain2.y = window.innerHeight - this.mountain2.image.height;
-		if(window.innerWidth <= 640){
-			this.mountain2.x = window.innerWidth * .25;
-			this.mountain1.x = window.innerWidth * -.2;
+		this.mountain1.y = h - this.mountain1.image.height;
+		this.mountain2.y = h - this.mountain2.image.height;
+		if(w <= 640){
+			this.mountain2.x = Math.round(w * .25)|0;
+			this.mountain1.x = Math.round(w * -.2)|0;
 		}else{
-			this.mountain1.x = window.innerWidth * .1;
-			this.mountain2.x = window.innerWidth * .4;
+			this.mountain1.x = Math.round(w * .1)|0;
+			this.mountain2.x = Math.round(w * .4)|0;
 		}
 	}
 }
@@ -143,23 +146,23 @@ var Ete = {
 			, win_w		= window.innerWidth
 			, win_h		= window.innerHeight
 			, direction	= rand1 > .5 ? 'right' : 'left'
-			, top 		= 0
-			, left 		= rand2 * (win_w / 2)
+			, top 		= 0|0
+			, left 		= rand2 * (win_w / 2)|0
 			, ete 		= new createjs.Container
 			, ss 		= new EteBitmap;
 
-		ete.width = 205;
-		ete.height = 168;
+		ete.width = 205|0;
+		ete.height = 168|0;
 		ete.ss = ss;
 		ete.ss.fall();
 		ete.addChild(ss);
 
 		if(direction != 'right'){
-			left = (win_w / 2) + left;
-			ete.scaleX = -1;
+			left = Math.round((win_w / 2) + left)|0;
+			ete.scaleX = -1|0;
 		}
 
-		top = -ete.height /2;
+		top = Math.round(-ete.height /2)|0;
 
 		ete.x = left;
 		ete.y = top;
@@ -179,12 +182,14 @@ var Ete = {
 
 		Game.add(ete);
 	}
-	, time: 5000
+
+	, time: 1000
 	, interval: function(){
 		var self = this;
 		this.create();
 		setTimeout(function(){ self.interval(); }, Math.random() * self.time + 1000);
 	}
+
 	, generateRandomImages: function(n){
 		var colors =['#c165c1']; //Initied with default color
 		for(var i = 0; i < n; i++){
