@@ -7,7 +7,7 @@
 	EteBitmap_p.initialize = function() {
 		var i = Math.round(Math.random() * (Ete.images.length - 1));
 		var img = Game.preloader.get('ete'+i);
-		EteBitmap._SpriteSheet = new createjs.SpriteSheet({images: [img], frames: [[0,0,205,168,0,93.8,76.85],[205,0,205,168,0,93.8,76.85],[410,0,205,168,0,93.8,76.85],[615,0,205,168,0,93.8,76.85],[0,168,205,168,0,93.8,76.85],[205,168,205,168,0,93.8,76.85],[410,168,205,168,0,93.8,76.85],[615,168,205,168,0,93.8,76.85],[0,336,205,168,0,93.8,76.85],[205,336,205,168,0,93.8,76.85],[410,336,205,168,0,93.8,76.85],[615,336,205,168,0,93.8,76.85],[0,504,205,168,0,93.8,76.85],[205,504,205,168,0,93.8,76.85],[410,504,205,168,0,93.8,76.85],[615,504,205,168,0,93.8,76.85],[0,672,205,168,0,93.8,76.85],[205,672,205,168,0,93.8,76.85],[410,672,205,168,0,93.8,76.85],[615,672,205,168,0,93.8,76.85],[0,840,205,168,0,93.8,76.85],[205,840,205,168,0,93.8,76.85],[410,840,205,168,0,93.8,76.85],[615,840,205,168,0,93.8,76.85],[0,1008,205,168,0,93.8,76.85],[205,1008,205,168,0,93.8,76.85],[410,1008,205,168,0,93.8,76.85],[615,1008,205,168,0,93.8,76.85],[0,1176,205,168,0,93.8,76.85],[205,1176,205,168,0,93.8,76.85],[410,1176,205,168,0,93.8,76.85],[615,1176,205,168,0,93.8,76.85],[0,1344,205,168,0,93.8,76.85],[205,1344,205,168,0,93.8,76.85],[410,1344,205,168,0,93.8,76.85],[615,1344,205,168,0,93.8,76.85],[0,1512,205,168,0,93.8,76.85],[205,1512,205,168,0,93.8,76.85],[410,1512,205,168,0,93.8,76.85]],  animations: {bubble:[0,0, true], fall:[1,8, true], airplane:[9,27, true], explode:[28,38, true]}});
+		EteBitmap._SpriteSheet = new createjs.SpriteSheet({images: [img], frames: [[0,0,205,168,0,93.8,76.85],[205,0,205,168,0,93.8,76.85],[410,0,205,168,0,93.8,76.85],[615,0,205,168,0,93.8,76.85],[0,168,205,168,0,93.8,76.85],[205,168,205,168,0,93.8,76.85],[410,168,205,168,0,93.8,76.85],[615,168,205,168,0,93.8,76.85],[0,336,205,168,0,93.8,76.85],[205,336,205,168,0,93.8,76.85],[410,336,205,168,0,93.8,76.85],[615,336,205,168,0,93.8,76.85],[0,504,205,168,0,93.8,76.85],[205,504,205,168,0,93.8,76.85],[410,504,205,168,0,93.8,76.85],[615,504,205,168,0,93.8,76.85],[0,672,205,168,0,93.8,76.85],[205,672,205,168,0,93.8,76.85],[410,672,205,168,0,93.8,76.85],[615,672,205,168,0,93.8,76.85],[0,840,205,168,0,93.8,76.85],[205,840,205,168,0,93.8,76.85],[410,840,205,168,0,93.8,76.85],[615,840,205,168,0,93.8,76.85],[0,1008,205,168,0,93.8,76.85],[205,1008,205,168,0,93.8,76.85],[410,1008,205,168,0,93.8,76.85],[615,1008,205,168,0,93.8,76.85],[0,1176,205,168,0,93.8,76.85],[205,1176,205,168,0,93.8,76.85],[410,1176,205,168,0,93.8,76.85],[615,1176,205,168,0,93.8,76.85],[0,1344,205,168,0,93.8,76.85],[205,1344,205,168,0,93.8,76.85],[410,1344,205,168,0,93.8,76.85],[615,1344,205,168,0,93.8,76.85],[0,1512,205,168,0,93.8,76.85],[205,1512,205,168,0,93.8,76.85],[410,1512,205,168,0,93.8,76.85]],  animations: {bubble:[0,0, true], fall:[1,8, true], airplane:[9,27, true], explode:[28,38, false]}});
 		this.BitmapAnimation_initialize(EteBitmap._SpriteSheet);
 		this.paused = false;
 	}
@@ -85,11 +85,12 @@ Game = {
         	self.mountain1 = new createjs.Bitmap(mountain1);
 			self.mountain2 = new createjs.Bitmap(mountain2);
 
-			self.stage.addChild(self.mountain1);
-			self.stage.addChild(self.mountain2);
+			//self.stage.addChild(self.mountain1);
+			//self.stage.addChild(self.mountain2);
 
-			createjs.Ticker.setFPS(60);
+			createjs.Ticker.useRAF = true;
 			createjs.Ticker.addListener(self);
+			createjs.Ticker.setFPS(60);
 
 			document.addEventListener('touchmove', function(e) { e.preventDefault(); }, false);
 			window.addEventListener('resize', function(){ self.onResize() });
@@ -102,6 +103,7 @@ Game = {
 	}
 
 	, tick: function(e){
+		$('#fps').text(Math.round(createjs.Ticker.getMeasuredFPS()));
 		for (var i = 0; i < this.sprites.length; i++) {
 			this.sprites[i].velocity.x += this.sprites[i].acceleration.x;
 			this.sprites[i].velocity.y += this.sprites[i].acceleration.y;
@@ -122,9 +124,14 @@ Game = {
 		this.canvas.height 	= window.innerHeight;
 
 		this.mountain1.y = window.innerHeight - this.mountain1.image.height;
-		this.mountain1.x = window.innerWidth * .2;
 		this.mountain2.y = window.innerHeight - this.mountain2.image.height;
-		this.mountain2.x = window.innerWidth * .4;
+		if(window.innerWidth <= 640){
+			this.mountain2.x = window.innerWidth * .25;
+			this.mountain1.x = window.innerWidth * -.2;
+		}else{
+			this.mountain1.x = window.innerWidth * .1;
+			this.mountain2.x = window.innerWidth * .4;
+		}
 	}
 }
 
@@ -133,19 +140,18 @@ var Ete = {
 	, create: function(){
 		var rand1 		= Math.random()
 			, rand2 	= Math.random()
-			, rand3 	= Math.random()
-			, rand4 	= Math.random()
 			, win_w		= window.innerWidth
 			, win_h		= window.innerHeight
-			, direction	= rand3 > .5 ? 'right' : 'left'
+			, direction	= rand1 > .5 ? 'right' : 'left'
 			, top 		= 0
-			, left 		= rand1 * (win_w / 2)
+			, left 		= rand2 * (win_w / 2)
 			, ete 		= new createjs.Container
 			, ss 		= new EteBitmap;
 
 		ete.width = 205;
 		ete.height = 168;
 		ete.ss = ss;
+		ete.ss.fall();
 		ete.addChild(ss);
 
 		if(direction != 'right'){
@@ -159,9 +165,16 @@ var Ete = {
 		ete.y = top;
 		ete.acceleration = new V2(direction == 'right' ? .05 : -.05, Math.random() * .2 + .1);
 		ete.velocity = new V2(0, 0);
+		ete.onAnimationEnd = function(bitmap, animation){
+		    if(animation == 'explode'){
+		    	Game.remove(ete);
+		    }
+		}
 
 		ete.addEventListener('mousedown', function(){
-			alert('test');
+			ete.acceleration = new V2(0, 0);
+			ete.velocity = new V2(0, 0);
+			ete.ss.explode();
 		});
 
 		Game.add(ete);
@@ -287,7 +300,6 @@ var Preloader = (function(){
 	}
 
 	Preloader.prototype.get = function(id){
-		console.log(this.list);
 		for (var i = 0; i < this.list.length; i++) {
 			if(this.list[i].id == id){
 				return this.list[i].img;
